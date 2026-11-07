@@ -30,6 +30,7 @@ p{margin:0}
 .editor{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 0 var(--line)}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .bar .sp{flex:1}
+.bar > button{font-size:18.2px}
 button{font:inherit;font-size:14px;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:8px;min-height:40px;padding:0 12px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -46,7 +47,7 @@ textarea:focus::placeholder{color:transparent}
 .spec button{display:flex;flex-direction:column;align-items:center;min-height:54px;padding:4px 2px;line-height:1.25}
 .spec .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .spec .g{font-family:var(--f-poj);font-size:20px}
-.opts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:13px}
+.opts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:19.5px}
 .opts label{display:inline-flex;gap:6px;align-items:center;min-height:32px}
 .fix{display:flex;flex-direction:column;gap:8px;background:var(--warn);border:1px solid var(--warn-line);border-radius:10px;padding:10px 12px}
 .fix .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
@@ -112,7 +113,7 @@ ol.rules{gap:4px}
     <section class="keyboard" aria-label="聲調與特殊符號鍵盤">
       <div class="keyboard-head"><h2>② 聲調與特殊符號鍵盤</h2><span>先輸入字母，再按聲調</span></div>
       <div class="keys" id="tones" aria-label="聲調鍵"><button type="button" data-insert="1" aria-label="輸入 1"><span class="g">a</span><span class="k">1</span></button><button type="button" data-insert="2" aria-label="輸入 2"><span class="g">á</span><span class="k">2</span></button><button type="button" data-insert="3" aria-label="輸入 3"><span class="g">à</span><span class="k">3</span></button><button type="button" data-insert="4" aria-label="輸入 4"><span class="g">ah</span><span class="k">4</span></button><button type="button" data-insert="5" aria-label="輸入 5"><span class="g">â</span><span class="k">5</span></button><button type="button" data-insert="7" aria-label="輸入 7"><span class="g">ā</span><span class="k">7</span></button><button type="button" data-insert="8" aria-label="輸入 8"><span class="g">a̍h</span><span class="k">8</span></button></div>
-      <div class="spec" id="spec" aria-label="特殊符號與編輯鍵"><button type="button" data-insert="o͘" aria-label="輸入 o͘，打oo也可"><span class="k">打oo也可</span><span class="g">o͘</span></button><button type="button" data-insert="ⁿ" aria-label="輸入 ⁿ，打nn也可"><span class="k">打nn也可</span><span class="g">ⁿ</span></button><button type="button" data-insert="-" aria-label="輸入 連字號"><span class="g">-</span><span class="k">連字號</span></button><button type="button" data-insert="," aria-label="輸入 逗點"><span class="k">逗點</span><span class="g">,</span></button><button type="button" data-insert="." aria-label="輸入 句點"><span class="g">.</span><span class="k">句點</span></button><button type="button" data-insert="__backspace__" aria-label="輸入 退格"><span class="g">⌫</span><span class="k">退格</span></button></div>
+      <div class="spec" id="spec" aria-label="特殊符號與編輯鍵"><button type="button" data-insert="o͘" aria-label="輸入 o͘，打oo也可"><span class="k">打oo也可</span><span class="g">o͘</span></button><button type="button" data-insert="ⁿ" aria-label="輸入 ⁿ，打nn也可"><span class="k">打nn也可</span><span class="g">ⁿ</span></button><button type="button" data-insert="-" aria-label="輸入 連字號"><span class="g">-</span><span class="k">連字號</span></button><button type="button" data-insert="," aria-label="輸入 逗點"><span class="k">逗點</span><span class="g">,</span></button><button type="button" data-insert="." aria-label="輸入 句點"><span class="k">句點</span><span class="g">.</span></button><button type="button" data-insert="__backspace__" aria-label="輸入 退格"><span class="g">⌫</span><span class="k">退格</span></button></div>
     </section>
     <noscript><p role="alert">目前是附件預覽，按鍵無法執行。請開啟線上操作版，或將檔案放到可執行 JavaScript 的網頁主機。</p></noscript>
     <div class="opts">
@@ -124,6 +125,7 @@ ol.rules{gap:4px}
       <button class="primary" id="copy" type="button">複製全部</button>
       <button id="all" type="button">整段轉換(貼上的文字)</button>
       <button id="clr" type="button">清空</button>
+      <button id="clear-fixes" type="button">清空糾錯</button>
       <span class="sp"></span>
       <span class="status" id="st" role="status"></span>
     </div>
@@ -134,47 +136,15 @@ ol.rules{gap:4px}
       <h2>打法</h2>
       <p>教羅就是教會羅馬字，也稱白話字（Pe̍h-ōe-jī，簡稱 POJ）。本頁以白話字字母拼寫台語，數字是輸入聲調的按鍵，轉換後不會留在文字中。</p>
       <ol class="rules" style="margin-top:12px">
-        <li><b>先打字母，再選聲調：</b>輸入 <span class="pill">tai5</span> 得到 <span class="o">tâi</span>；也可先打 <span class="pill">tai</span>，再點畫面上的「5」。</li>
-        <li><b>使用教羅拼法：</b>子音用 ch、chh；母音與韻母可見 oa、oe、eng、ek。例如 <span class="pill">chhiu2</span> → chhiú（手）。</li>
-        <li><b>點音 o͘：</b>打 <span class="pill">oo</span> 或點「o͘」。先打 p，再點 o͘ 得到 po͘；再點「7」得到 pō͘。o͘ 右上的點是字母的一部分，不是聲調。</li>
-        <li><b>鼻化 ⁿ：</b>母音後打 <span class="pill">nn</span> 或點「ⁿ」。例如 <span class="pill">chhiann2</span> → chhiáⁿ（請）。ⁿ 表示鼻化，不等於韻尾 n、m、ng。</li>
-        <li><b>第 1、4 聲不加調號：</b><span class="pill">si1</span> → si（詩）；<span class="pill">sik4</span> → sik（色）。數字可用來確認調類；第 4、8 聲須有 p、t、k、h 斷音韻尾。</li>
+        <li><b>先打字母，再選聲調：</b>輸入 tai5 得到 tâi；也可先打 tai，再點畫面上的「5 â 」。</li>
+        <li><b>使用教羅拼法：</b>子音用 ch、chh；母音與韻母可見 oa、oe、eng、ek。例如 chhiu2 → chhiú（手）或點 chhiu(2 á) → chhiú（手）。</li>
+        <li><b>點音 o͘：</b>打 oo 或點「o͘」。先打 p，再點 o͘ 得到 po͘；再點「7 ā」得到 pō͘。o͘ 右上的點是字母的一部分，不是聲調。</li>
+        <li><b>鼻化 ⁿ：</b>母音後打 nn 或點「ⁿ」。例如 chhiann2 → chhiáⁿ（請）或點 chhia(ⁿ)+(2 á) → chhiáⁿ（請）。ⁿ 表示鼻化，不等於韻尾 n、m、ng。</li>
+        <li><b>第 1、4 聲不加調號：</b>si1 → si（詩）或點si(1 a) ,sik4  → sik（色）或點sik(4 ah)  → sik（色）。數字可用來確認調類；第 4、8 聲須有 p、t、k、h 斷音韻尾。</li>
         <li><b>連字與分詞：</b>同一詞內用「-」連接音節，詞與詞之間用空格；輕聲標記「--」可用一般鍵盤輸入；畫面另提供逗點「,」與句點「.」按鍵。用「退格」刪除游標前一個字形。</li>
         <li><b>書寫本調：</b>一般白話字寫本調，朗讀時依詞句變調；本輸入法不會自動把整句改寫成變調後的聲調。</li>
       </ol>
       <p class="note">實體鍵盤輸入數字時須開啟「自動轉換」；畫面聲調鍵可直接使用。貼上的數字式白話字，可按「整段轉換」。</p>
-    </section>
-
-    <section class="card">
-      <h2>聲調符號放哪裡</h2>
-      <p>每個音節只標一個聲調符號。本頁採下列常見教羅掛音方式；舊字典與不同教材可能有異體。</p>
-      <ol class="rules" style="margin-top:12px">
-        <li><b>單母音：</b>直接標在母音上。例如 <span class="pill">si7</span> → sī；<span class="pill">hoo7</span> → hō͘。</li>
-        <li><b>一般有 a 的組合：</b>標在 a。例如 <span class="pill">tai5</span> → tâi、<span class="pill">chiau2</span> → chiáu、<span class="pill">oan5</span> → oân。</li>
-        <li><b>音節末的 oa、oe：</b>沒有其他韻尾時標在 o；鼻化 ⁿ 不算另加韻尾。例如 <span class="pill">goa2</span> → góa、<span class="pill">oe7</span> → ōe、<span class="pill">khoann3</span> → khòaⁿ。</li>
-        <li><b>oa、oe 後另有韻尾：</b>標回 a 或 e。例如 <span class="pill">koan2</span> → koán、<span class="pill">goeh8</span> → goe̍h。oai 標 a，例如 <span class="pill">oai7</span> → oāi。</li>
-        <li><b>iu、ui 都標 u：</b><span class="pill">kiu2</span> → kiú；<span class="pill">chui2</span> → chúi（水）。io 則標 o，例如 <span class="pill">hioh8</span> → hio̍h（葉）。</li>
-        <li><b>成節鼻音：</b>m 標在 m；ng 標在 n。例如 <span class="pill">m7</span> → m̄、<span class="pill">ng5</span> → n̂g、<span class="pill">png7</span> → pn̄g（飯）。</li>
-        <li><b>斷音與鼻化：</b>第 8 聲的直線標在音節核心，不標在韻尾。例如 <span class="pill">peh8</span> → pe̍h（白）；鼻化音仍標在母音上，例如 <span class="pill">chhiann2</span> → chhiáⁿ。</li>
-      </ol>
-      <p class="note">第 1、4 聲無調號；第 2、3、5、7、8 聲分別用 á、à、â、ā、a̍ 的符號。不要把點音 o͘ 的點或鼻化 ⁿ 當成調號。</p>
-    </section>
-
-    <section class="card">
-      <h2>八個聲調</h2>
-      <p>傳統以「八音」編號；臺灣台語常用教羅中，第 6 聲（陽上）已併入第 2 聲，所以鍵盤提供 1、2、3、4、5、7、8，共七個調類。</p>
-      <div class="scroll"><table>
-        <tr><th>音序</th><th>調類</th><th>調號</th><th>白話字</th><th>漢字例</th><th>輸入</th></tr>
-<tr><td>1</td><td>陰平</td><td>無</td><td class="o">si</td><td>詩</td><td>si1</td></tr>
-<tr><td>2</td><td>陰上</td><td>◌́</td><td class="o">sí</td><td>死</td><td>si2</td></tr>
-<tr><td>3</td><td>陰去</td><td>◌̀</td><td class="o">sì</td><td>四</td><td>si3</td></tr>
-<tr><td>4</td><td>陰入</td><td>無；斷音</td><td class="o">sik</td><td>色</td><td>sik4</td></tr>
-<tr><td>5</td><td>陽平</td><td>◌̂</td><td class="o">sî</td><td>時</td><td>si5</td></tr>
-<tr><td>6</td><td>陽上</td><td>併入第 2 聲</td><td class="o">—</td><td>不另設按鍵</td><td>—</td></tr>
-<tr><td>7</td><td>陽去</td><td>◌̄</td><td class="o">sī</td><td>是</td><td>si7</td></tr>
-<tr><td>8</td><td>陽入</td><td>◌̍</td><td class="o">si̍t</td><td>實</td><td>sit8</td></tr>
-      </table></div>
-      <p class="note">第 4、8 聲為入聲，以 p、t、k、h 結尾，讀到韻尾時收住氣流；第 4 聲不加調號，第 8 聲加直線。第 9 聲不列入本頁傳統八音入門表。</p>
     </section>
 
     <section class="card">
@@ -184,15 +154,15 @@ ol.rules{gap:4px}
         <li>最後一個音節,也就是游標所在或文字結尾的那個,不檢查,因為還沒打完。</li>
         <li>只有一種改法時,自動改好,並顯示「復原」。</li>
         <li>有好幾種改法時,列出選項讓你點。</li>
-        <li>常見錯誤:拼法不存在(<span class="c">xa1</span>、<span class="c">hou7</span>)、聲調配錯結尾(<span class="c">ma4</span>、<span class="c">tak3</span>)、不存在的第 6 聲。</li>
+        <li>常見錯誤:拼法不存在(xa1、hou7)、聲調配錯結尾(ma4、tak3)、不存在的第 6 聲。</li>
       </ol>
-      <p class="note">檢查只針對打過聲調數字或帶調號的音節。混寫其他語言時,可取消「糾錯提示」。</p>
+      <p class="note">檢查只針對打過聲調數字或帶調號的音節。混寫其他語言時,可點選&quot;清空糾錯&quot;刪除「糾錯提示」。</p>
     </section>
 
     <section class="card">
       <h2>範例</h2>
       <p>依序輸入字母、特殊字母及聲調，就能組成教羅白話字。下表使用本頁的數字式輸入方式。</p>
-      <div class="scroll"><table id="ex"><tr><th>鍵盤輸入</th><th>教羅白話字</th><th>漢字意思</th></tr>
+<div class="scroll" style="margin-top:12px"><table id="ex"><tr><th>鍵盤輸入</th><th>教羅白話字</th><th>漢字意思</th></tr>
 <tr><td class="c">tai5</td><td class="o">tâi</td><td>台</td></tr>
 <tr><td class="c">goa2</td><td class="o">góa</td><td>我</td></tr>
 <tr><td class="c">oe7</td><td class="o">ōe</td><td>話</td></tr>
@@ -202,12 +172,24 @@ ol.rules{gap:4px}
 <tr><td class="c">hoo7</td><td class="o">hō͘</td><td>雨</td></tr>
 <tr><td class="c">png7</td><td class="o">pn̄g</td><td>飯</td></tr>
 <tr><td class="c">peh8</td><td class="o">pe̍h</td><td>白</td></tr>
-<tr><td class="c">Peh8-oe7-ji7</td><td class="o">Pe̍h-ōe-jī</td><td>白話字</td></tr>
-<tr><td class="c">Tai5-oan5</td><td class="o">Tâi-oân</td><td>台灣</td></tr>
-<tr><td class="c">kam2-sia7</td><td class="o">kám-siā</td><td>感謝</td></tr>
-      </table></div>
-      <p class="note">畫面鍵盤示範：p → 點 o͘ → po͘ → 點 7 → pō͘。也可直接打 <span class="pill">poo7</span>。已標調的音節，可再點其他聲調鍵更換調號。</p>
-      <p class="note">參考：<a href="https://taigi.fhl.net/TaigiIME/" target="_blank" rel="noopener">信望愛台語客語輸入法</a>、<a href="https://github.com/TongUanLab/thokit#白話字標準說明" target="_blank" rel="noopener">白話字拼寫與掛音慣例比較</a>。數字輸入與畫面按鍵操作依本工具設計。</p>
+<tr><td class="c">Peh8 - oe7 - ji7</td><td class="o">Pe̍h - ōe -jī</td><td>白話字</td></tr>
+<tr><td class="c">Tai5 - oan5</td><td class="o">Tâi - oân</td><td>台灣</td></tr>
+<tr><td class="c">kam2 - sia7</td><td class="o">kám - siā</td><td>感謝</td></tr>
+</table></div>
+<div class="scroll" style="margin-top:12px"><table id="ex-screen"><tr><th>鍵盤加螢幕輸入</th><th>教羅白話字</th><th>漢字意思</th></tr>
+<tr><td class="c">tai(5 â)</td><td class="o">tâi</td><td>台</td></tr>
+<tr><td class="c">goa(2 á)</td><td class="o">góa</td><td>我</td></tr>
+<tr><td class="c">oe(7 ō)</td><td class="o">ōe</td><td>話</td></tr>
+<tr><td class="c">chui(2 á)</td><td class="o">chúi</td><td>水</td></tr>
+<tr><td class="c">chhiu(2 á)</td><td class="o">chhiú</td><td>手</td></tr>
+<tr><td class="c">chhia(ⁿ)+(2 á)</td><td class="o">chhiáⁿ</td><td>請</td></tr>
+<tr><td class="c">h(o͘ )+(7 ō)</td><td class="o">hō͘</td><td>雨</td></tr>
+<tr><td class="c">png(7 ā)</td><td class="o">pn̄g</td><td>飯</td></tr>
+<tr><td class="c">peh(8 a̍h)</td><td class="o">pe̍h</td><td>白</td></tr>
+<tr><td class="c">Peh(8 a̍h) - oe(7 ā) - ji(7 ā)</td><td class="o">Pe̍h - ōe - jī</td><td>白話字</td></tr>
+<tr><td class="c">Tai(5 â) - oan(5 â)</td><td class="o">Tâi - oân</td><td>台灣</td></tr>
+<tr><td class="c">kam(2 á)-sia(7 ā)</td><td class="o">kám - siā</td><td>感謝</td></tr>
+</table></div>
     </section>
   </div>
 </div>
@@ -594,6 +576,17 @@ document.querySelectorAll('[data-insert]').forEach(function (b) {
   b.addEventListener('click', function () { insert(b.getAttribute('data-insert')); });
 });
 document.getElementById('all').addEventListener('click', function () { convertAll(); say('已轉換'); refresh(); });
+// Dismiss all displayed correction messages without changing the editor or settings.
+var clearFixesButton = document.getElementById('clear-fixes');
+clearFixesButton.addEventListener('mousedown', function (e) { e.preventDefault(); });
+clearFixesButton.addEventListener('click', function () {
+  currentIssues().forEach(function (issue) { ignored.add(issue.token.text); });
+  clearTimeout(timer);
+  undoState = null;
+  st.textContent = '';
+  fixEl.textContent = '';
+  fixEl.hidden = true;
+});
 document.getElementById('clr').addEventListener('click', function () { ed.value = ''; entered.clear(); ignored.clear(); ed.focus(); ed.setSelectionRange(0, 0); rememberRange(); refresh(); });
 document.getElementById('copy').addEventListener('click', function () {
   var t = ed.value;
