@@ -77,11 +77,11 @@ ol.rules{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 .keyboard .keys button{flex-direction:column-reverse;gap:6px;padding:8px 2px}
 .keyboard .keys .k{font-size:22px;color:#142e34;font-weight:700}.keyboard .keys .g{font-size:26px}
 .keyboard .spec{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:4px}
-.keyboard .spec button{justify-content:center;gap:8px;min-height:100px;background:#fff9e9;border-color:#ddcf9f;box-shadow:0 4px 0 #bba35b}
-.keyboard .spec .g{font-size:36px;font-weight:700}.keyboard .spec .k{font-family:var(--f-ui);font-size:15px;color:#415457}
+.keyboard .spec button{flex-direction:row;align-items:center;justify-content:center;gap:6px;min-height:calc(100px * 2 / 3);height:calc(100px * 2 / 3);white-space:nowrap;background:#fff9e9;border-color:#ddcf9f;box-shadow:0 4px 0 #bba35b}
+.keyboard .spec .g{font-size:28px;font-weight:700}.keyboard .spec .k{font-family:var(--f-ui);font-size:15px;color:#415457}
 .keyboard .spec button:nth-last-child(-n+2){background:#fff;border-color:#bfceca;box-shadow:0 4px 0 #88afa3}
 .keyboard button:active{transform:translateY(3px);box-shadow:none}
-@media(max-width:480px){.keyboard{padding:10px;gap:12px}.keyboard-head h2{font-size:18px}.keyboard-head span{font-size:12px}.keyboard .keys{gap:4px}.keyboard .keys button{min-height:76px}.keyboard .keys .k{font-size:20px}.keyboard .keys .g{font-size:23px}.keyboard .spec button{min-height:90px}}
+@media(max-width:480px){.keyboard{padding:10px;gap:12px}.keyboard-head h2{font-size:18px}.keyboard-head span{font-size:12px}.keyboard .keys{gap:4px}.keyboard .keys button{min-height:76px}.keyboard .keys .k{font-size:20px}.keyboard .keys .g{font-size:23px}.keyboard .spec button{min-height:60px;height:60px;gap:4px}.keyboard .spec .g{font-size:24px}.keyboard .spec .k{font-size:14px}}
 /* Compact vertical spacing below the title. */
 body{padding-block:8px 20px}
 .wrap{gap:6px}
@@ -110,7 +110,7 @@ ol.rules{gap:4px}
     <section class="keyboard" aria-label="聲調與特殊符號鍵盤">
       <div class="keyboard-head"><h2>② 聲調與特殊符號鍵盤</h2><span>先輸入字母，再按聲調</span></div>
       <div class="keys" id="tones" aria-label="聲調鍵"><button type="button" data-insert="1" aria-label="輸入 1"><span class="g">a</span><span class="k">1</span></button><button type="button" data-insert="2" aria-label="輸入 2"><span class="g">á</span><span class="k">2</span></button><button type="button" data-insert="3" aria-label="輸入 3"><span class="g">à</span><span class="k">3</span></button><button type="button" data-insert="4" aria-label="輸入 4"><span class="g">ah</span><span class="k">4</span></button><button type="button" data-insert="5" aria-label="輸入 5"><span class="g">â</span><span class="k">5</span></button><button type="button" data-insert="7" aria-label="輸入 7"><span class="g">ā</span><span class="k">7</span></button><button type="button" data-insert="8" aria-label="輸入 8"><span class="g">a̍h</span><span class="k">8</span></button></div>
-      <div class="spec" id="spec" aria-label="特殊符號與編輯鍵"><button type="button" data-insert="o͘" aria-label="輸入 點音"><span class="g">o͘</span><span class="k">點音</span></button><button type="button" data-insert="ⁿ" aria-label="輸入 鼻化"><span class="g">ⁿ</span><span class="k">鼻化</span></button><button type="button" data-insert="-" aria-label="輸入 連字號"><span class="g">-</span><span class="k">連字號</span></button><button type="button" data-insert="--" aria-label="輸入 輕聲符"><span class="g">--</span><span class="k">輕聲符</span></button><button type="button" data-insert=" " aria-label="輸入 分詞"><span class="g">空格</span><span class="k">分詞</span></button><button type="button" data-insert="__backspace__" aria-label="輸入 退格"><span class="g">⌫</span><span class="k">退格</span></button></div>
+      <div class="spec" id="spec" aria-label="特殊符號與編輯鍵"><button type="button" data-insert="o͘" aria-label="輸入 點音"><span class="k">點音</span><span class="g">o͘</span></button><button type="button" data-insert="ⁿ" aria-label="輸入 鼻化"><span class="g">ⁿ</span><span class="k">鼻化</span></button><button type="button" data-insert="-" aria-label="輸入 連字號"><span class="g">-</span><span class="k">連字號</span></button><button type="button" data-insert="--" aria-label="輸入 輕聲符"><span class="g">--</span><span class="k">輕聲符</span></button><button type="button" data-insert=" " aria-label="輸入 分詞"><span class="g">空格</span><span class="k">分詞</span></button><button type="button" data-insert="__backspace__" aria-label="輸入 退格"><span class="g">⌫</span><span class="k">退格</span></button></div>
     </section>
     <noscript><p role="alert">目前是附件預覽，按鍵無法執行。請開啟線上操作版，或將檔案放到可執行 JavaScript 的網頁主機。</p></noscript>
     <div class="opts">
