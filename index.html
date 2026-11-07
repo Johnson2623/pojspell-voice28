@@ -1,0 +1,606 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>白話字輸入法</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Charis+SIL:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gentium+Plus:wght@400;700&display=swap">
+<style>
+/* Layout: one working editor up top (toolbar docked below it on phones), reference tables below in a two-column grid that stacks. */
+:root{
+  --bg:#f1f5f4; --surface:#ffffff; --fg:#14262a; --muted:#5a6f73; --line:#d3dfdd;
+  --accent:#0b6e78; --accent-fg:#ffffff; --mark:#c8431f; --field:#fbfdfc; --warn:#fdf0ea; --warn-line:#efc3b3;
+  --f-ui:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-poj:"Charis SIL","Gentium Plus","Doulos SIL","Noto Serif","Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1a1c; --surface:#142427; --fg:#e4efee; --muted:#93adb0; --line:#26393c;
+  --accent:#4cc3cf; --accent-fg:#06201f; --mark:#ff8a63; --field:#0f1e20; --warn:#2b1b15; --warn-line:#6b3a2a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1a1c; --surface:#142427; --fg:#e4efee; --muted:#93adb0; --line:#26393c;
+  --accent:#4cc3cf; --accent-fg:#06201f; --mark:#ff8a63; --field:#0f1e20; --warn:#2b1b15; --warn-line:#6b3a2a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.65;
+  padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:clamp(26px,5vw,38px);line-height:1.2;margin:0;font-weight:700;text-wrap:balance}
+h1 .poj{font-family:var(--f-poj);font-weight:700;color:var(--accent);margin-left:.4em;font-size:.8em}
+h2{font-size:18px;margin:0 0 10px;text-wrap:balance}
+p{margin:0}
+.editor{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 0 var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar .sp{flex:1}
+button{font:inherit;font-size:14px;color:var(--fg);background:var(--field);border:1px solid var(--line);border-radius:8px;min-height:40px;padding:0 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:500}
+textarea{width:100%;min-height:170px;resize:vertical;font-family:var(--f-poj);font-size:24px;line-height:1.6;color:var(--fg);
+  background:var(--field);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+textarea::placeholder{color:var(--muted);opacity:1}
+textarea:focus::placeholder{color:transparent}
+.keys{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.keys button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:4px 2px;min-height:54px;line-height:1.25}
+.keys .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.keys .g{font-family:var(--f-poj);font-size:20px}
+.spec{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.spec button{display:flex;flex-direction:column;align-items:center;min-height:54px;padding:4px 2px;line-height:1.25}
+.spec .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.spec .g{font-family:var(--f-poj);font-size:20px}
+.opts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:13px}
+.opts label{display:inline-flex;gap:6px;align-items:center;min-height:32px}
+.fix{display:flex;flex-direction:column;gap:8px;background:var(--warn);border:1px solid var(--warn-line);border-radius:10px;padding:10px 12px}
+.fix .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.fix .tk{font-family:var(--f-poj);font-size:20px;color:var(--mark);background:none;border:0;min-height:36px;padding:0 4px;text-decoration:underline wavy;text-underline-offset:4px}
+.fix .why{flex:1 1 200px;min-width:0;font-size:13px;color:var(--muted)}
+.fix .c{font-family:var(--f-poj);font-size:18px;min-height:36px;padding:0 10px}
+.fix .ig{font-size:12px;color:var(--muted);min-height:36px}
+.status{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);min-height:20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:baseline;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:12px;letter-spacing:.06em}
+td.c,.c{font-family:var(--f-mono);font-size:13px}
+td.o{font-family:var(--f-poj);font-size:19px}
+.m{color:var(--mark)}
+ol.rules{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.pill{font-family:var(--f-mono);font-size:12px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.note{color:var(--muted);font-size:13px;margin-top:10px}
+@media (max-width:720px){.grid{grid-template-columns:minmax(0,1fr)}.keys{grid-template-columns:repeat(4,minmax(0,1fr))}textarea{font-size:22px}}
+/* The complete keyboard stays visible on desktop and phones. */
+.keyboard{background:#f5faf8;border:1px solid #d3dfdd;border-radius:14px;padding:14px;color:#142e34;display:grid;gap:14px}
+.keyboard-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.keyboard-head h2{margin:0;font-size:20px}.keyboard-head span{font-size:13px;color:#415a5e}
+.keyboard .keys{grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.keyboard button{background:#fff;color:#142e34;border:1px solid #bfceca;box-shadow:0 4px 0 #88afa3;border-radius:10px;min-height:88px}
+.keyboard .keys button{flex-direction:column-reverse;gap:6px;padding:8px 2px}
+.keyboard .keys .k{font-size:22px;color:#142e34;font-weight:700}.keyboard .keys .g{font-size:26px}
+.keyboard .spec{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:4px}
+.keyboard .spec button{justify-content:center;gap:8px;min-height:100px;background:#fff9e9;border-color:#ddcf9f;box-shadow:0 4px 0 #bba35b}
+.keyboard .spec .g{font-size:36px;font-weight:700}.keyboard .spec .k{font-family:var(--f-ui);font-size:15px;color:#415457}
+.keyboard .spec button:nth-last-child(-n+2){background:#fff;border-color:#bfceca;box-shadow:0 4px 0 #88afa3}
+.keyboard button:active{transform:translateY(3px);box-shadow:none}
+@media(max-width:480px){.keyboard{padding:10px;gap:12px}.keyboard-head h2{font-size:18px}.keyboard-head span{font-size:12px}.keyboard .keys{gap:4px}.keyboard .keys button{min-height:76px}.keyboard .keys .k{font-size:20px}.keyboard .keys .g{font-size:23px}.keyboard .spec button{min-height:90px}}
+/* Compact vertical spacing below the title. */
+body{padding-block:8px 20px}
+.wrap{gap:6px}
+.editor{padding:6px;gap:6px}
+.keyboard{padding:8px;gap:6px}
+.keyboard-head{gap:4px}
+.keyboard .spec{row-gap:6px}
+.opts{row-gap:2px}
+.bar{row-gap:4px}
+.grid{gap:10px}
+.card{padding:12px}
+h2{margin-bottom:6px}
+.note{margin-top:6px}
+ol.rules{gap:4px}
+@media(max-width:480px){.keyboard{padding:6px;gap:6px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>白話字輸入法<span class="poj">Pe̍h-ōe-jī</span></h1>
+  </header>
+
+  <section class="editor" aria-label="輸入區">
+    <textarea id="ed" lang="nan-Latn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="白話字輸入框" placeholder="用一般鍵盤打拼音,每個音節最後加聲調數字,就會直接變成白話字。手機和電腦都能用。"></textarea>
+    <div class="fix" id="fix" hidden aria-live="polite"></div>
+    <section class="keyboard" aria-label="聲調與特殊符號鍵盤">
+      <div class="keyboard-head"><h2>② 聲調與特殊符號鍵盤</h2><span>先輸入字母，再按聲調</span></div>
+      <div class="keys" id="tones" aria-label="聲調鍵"><button type="button" data-insert="1" aria-label="輸入 1"><span class="g">a</span><span class="k">1</span></button><button type="button" data-insert="2" aria-label="輸入 2"><span class="g">á</span><span class="k">2</span></button><button type="button" data-insert="3" aria-label="輸入 3"><span class="g">à</span><span class="k">3</span></button><button type="button" data-insert="4" aria-label="輸入 4"><span class="g">ah</span><span class="k">4</span></button><button type="button" data-insert="5" aria-label="輸入 5"><span class="g">â</span><span class="k">5</span></button><button type="button" data-insert="7" aria-label="輸入 7"><span class="g">ā</span><span class="k">7</span></button><button type="button" data-insert="8" aria-label="輸入 8"><span class="g">a̍h</span><span class="k">8</span></button></div>
+      <div class="spec" id="spec" aria-label="特殊符號與編輯鍵"><button type="button" data-insert="o͘" aria-label="輸入 點音"><span class="g">o͘</span><span class="k">點音</span></button><button type="button" data-insert="ⁿ" aria-label="輸入 鼻化"><span class="g">ⁿ</span><span class="k">鼻化</span></button><button type="button" data-insert="-" aria-label="輸入 連字號"><span class="g">-</span><span class="k">連字號</span></button><button type="button" data-insert="--" aria-label="輸入 輕聲符"><span class="g">--</span><span class="k">輕聲符</span></button><button type="button" data-insert=" " aria-label="輸入 分詞"><span class="g">空格</span><span class="k">分詞</span></button><button type="button" data-insert="__backspace__" aria-label="輸入 退格"><span class="g">⌫</span><span class="k">退格</span></button></div>
+    </section>
+    <noscript><p role="alert">目前是附件預覽，按鍵無法執行。請開啟線上操作版，或將檔案放到可執行 JavaScript 的網頁主機。</p></noscript>
+    <div class="opts">
+      <label><input type="checkbox" id="on" checked> 自動轉換</label>
+      <label><input type="checkbox" id="chk" checked> 糾錯提示</label>
+      <label><input type="checkbox" id="ts"> 也接受 ts / tsh(自動變 ch / chh)</label>
+    </div>
+    <div class="bar">
+      <button class="primary" id="copy" type="button">複製全部</button>
+      <button id="all" type="button">整段轉換(貼上的文字)</button>
+      <button id="clr" type="button">清空</button>
+      <span class="sp"></span>
+      <span class="status" id="st" role="status"></span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>打法</h2>
+      <p>教羅就是教會羅馬字，也稱白話字（Pe̍h-ōe-jī，簡稱 POJ）。本頁以白話字字母拼寫台語，數字是輸入聲調的按鍵，轉換後不會留在文字中。</p>
+      <ol class="rules" style="margin-top:12px">
+        <li><b>先打字母，再選聲調：</b>輸入 <span class="pill">tai5</span> 得到 <span class="o">tâi</span>；也可先打 <span class="pill">tai</span>，再點畫面上的「5」。</li>
+        <li><b>使用教羅拼法：</b>子音用 ch、chh；母音與韻母可見 oa、oe、eng、ek。例如 <span class="pill">chhiu2</span> → chhiú（手）。</li>
+        <li><b>點音 o͘：</b>打 <span class="pill">oo</span> 或點「o͘」。先打 p，再點 o͘ 得到 po͘；再點「7」得到 pō͘。o͘ 右上的點是字母的一部分，不是聲調。</li>
+        <li><b>鼻化 ⁿ：</b>母音後打 <span class="pill">nn</span> 或點「ⁿ」。例如 <span class="pill">chhiann2</span> → chhiáⁿ（請）。ⁿ 表示鼻化，不等於韻尾 n、m、ng。</li>
+        <li><b>第 1、4 聲不加調號：</b><span class="pill">si1</span> → si（詩）；<span class="pill">sik4</span> → sik（色）。數字可用來確認調類；第 4、8 聲須有 p、t、k、h 斷音韻尾。</li>
+        <li><b>連字與分詞：</b>同一詞內用「-」連接音節，詞與詞之間用空格；本頁提供「--」作輕聲標記。用「退格」刪除游標前一個字形。</li>
+        <li><b>書寫本調：</b>一般白話字寫本調，朗讀時依詞句變調；本輸入法不會自動把整句改寫成變調後的聲調。</li>
+      </ol>
+      <p class="note">實體鍵盤輸入數字時須開啟「自動轉換」；畫面聲調鍵可直接使用。貼上的數字式白話字，可按「整段轉換」。</p>
+    </section>
+
+    <section class="card">
+      <h2>聲調符號放哪裡</h2>
+      <p>每個音節只標一個聲調符號。本頁採下列常見教羅掛音方式；舊字典與不同教材可能有異體。</p>
+      <ol class="rules" style="margin-top:12px">
+        <li><b>單母音：</b>直接標在母音上。例如 <span class="pill">si7</span> → sī；<span class="pill">hoo7</span> → hō͘。</li>
+        <li><b>一般有 a 的組合：</b>標在 a。例如 <span class="pill">tai5</span> → tâi、<span class="pill">chiau2</span> → chiáu、<span class="pill">oan5</span> → oân。</li>
+        <li><b>音節末的 oa、oe：</b>沒有其他韻尾時標在 o；鼻化 ⁿ 不算另加韻尾。例如 <span class="pill">goa2</span> → góa、<span class="pill">oe7</span> → ōe、<span class="pill">khoann3</span> → khòaⁿ。</li>
+        <li><b>oa、oe 後另有韻尾：</b>標回 a 或 e。例如 <span class="pill">koan2</span> → koán、<span class="pill">goeh8</span> → goe̍h。oai 標 a，例如 <span class="pill">oai7</span> → oāi。</li>
+        <li><b>iu、ui 都標 u：</b><span class="pill">kiu2</span> → kiú；<span class="pill">chui2</span> → chúi（水）。io 則標 o，例如 <span class="pill">hioh8</span> → hio̍h（葉）。</li>
+        <li><b>成節鼻音：</b>m 標在 m；ng 標在 n。例如 <span class="pill">m7</span> → m̄、<span class="pill">ng5</span> → n̂g、<span class="pill">png7</span> → pn̄g（飯）。</li>
+        <li><b>斷音與鼻化：</b>第 8 聲的直線標在音節核心，不標在韻尾。例如 <span class="pill">peh8</span> → pe̍h（白）；鼻化音仍標在母音上，例如 <span class="pill">chhiann2</span> → chhiáⁿ。</li>
+      </ol>
+      <p class="note">第 1、4 聲無調號；第 2、3、5、7、8 聲分別用 á、à、â、ā、a̍ 的符號。不要把點音 o͘ 的點或鼻化 ⁿ 當成調號。</p>
+    </section>
+
+    <section class="card">
+      <h2>八個聲調</h2>
+      <p>傳統以「八音」編號；臺灣台語常用教羅中，第 6 聲（陽上）已併入第 2 聲，所以鍵盤提供 1、2、3、4、5、7、8，共七個調類。</p>
+      <div class="scroll"><table>
+        <tr><th>音序</th><th>調類</th><th>調號</th><th>白話字</th><th>漢字例</th><th>輸入</th></tr>
+<tr><td>1</td><td>陰平</td><td>無</td><td class="o">si</td><td>詩</td><td>si1</td></tr>
+<tr><td>2</td><td>陰上</td><td>◌́</td><td class="o">sí</td><td>死</td><td>si2</td></tr>
+<tr><td>3</td><td>陰去</td><td>◌̀</td><td class="o">sì</td><td>四</td><td>si3</td></tr>
+<tr><td>4</td><td>陰入</td><td>無；斷音</td><td class="o">sik</td><td>色</td><td>sik4</td></tr>
+<tr><td>5</td><td>陽平</td><td>◌̂</td><td class="o">sî</td><td>時</td><td>si5</td></tr>
+<tr><td>6</td><td>陽上</td><td>併入第 2 聲</td><td class="o">—</td><td>不另設按鍵</td><td>—</td></tr>
+<tr><td>7</td><td>陽去</td><td>◌̄</td><td class="o">sī</td><td>是</td><td>si7</td></tr>
+<tr><td>8</td><td>陽入</td><td>◌̍</td><td class="o">si̍t</td><td>實</td><td>sit8</td></tr>
+      </table></div>
+      <p class="note">第 4、8 聲為入聲，以 p、t、k、h 結尾，讀到韻尾時收住氣流；第 4 聲不加調號，第 8 聲加直線。第 9 聲不列入本頁傳統八音入門表。</p>
+    </section>
+
+    <section class="card">
+      <h2>糾錯怎麼運作</h2>
+      <ol class="rules">
+        <li>你開始打下一個音節(空格、連字號或標點之後),前面的音節就會被檢查。</li>
+        <li>最後一個音節,也就是游標所在或文字結尾的那個,不檢查,因為還沒打完。</li>
+        <li>只有一種改法時,自動改好,並顯示「復原」。</li>
+        <li>有好幾種改法時,列出選項讓你點。</li>
+        <li>常見錯誤:拼法不存在(<span class="c">xa1</span>、<span class="c">hou7</span>)、聲調配錯結尾(<span class="c">ma4</span>、<span class="c">tak3</span>)、不存在的第 6 聲。</li>
+      </ol>
+      <p class="note">檢查只針對打過聲調數字或帶調號的音節。混寫其他語言時,可取消「糾錯提示」。</p>
+    </section>
+
+    <section class="card">
+      <h2>範例</h2>
+      <p>依序輸入字母、特殊字母及聲調，就能組成教羅白話字。下表使用本頁的數字式輸入方式。</p>
+      <div class="scroll"><table id="ex"><tr><th>鍵盤輸入</th><th>教羅白話字</th><th>漢字意思</th></tr>
+<tr><td class="c">tai5</td><td class="o">tâi</td><td>台</td></tr>
+<tr><td class="c">goa2</td><td class="o">góa</td><td>我</td></tr>
+<tr><td class="c">oe7</td><td class="o">ōe</td><td>話</td></tr>
+<tr><td class="c">chui2</td><td class="o">chúi</td><td>水</td></tr>
+<tr><td class="c">chhiu2</td><td class="o">chhiú</td><td>手</td></tr>
+<tr><td class="c">chhiann2</td><td class="o">chhiáⁿ</td><td>請</td></tr>
+<tr><td class="c">hoo7</td><td class="o">hō͘</td><td>雨</td></tr>
+<tr><td class="c">png7</td><td class="o">pn̄g</td><td>飯</td></tr>
+<tr><td class="c">peh8</td><td class="o">pe̍h</td><td>白</td></tr>
+<tr><td class="c">Peh8-oe7-ji7</td><td class="o">Pe̍h-ōe-jī</td><td>白話字</td></tr>
+<tr><td class="c">Tai5-oan5</td><td class="o">Tâi-oân</td><td>台灣</td></tr>
+<tr><td class="c">kam2-sia7</td><td class="o">kám-siā</td><td>感謝</td></tr>
+      </table></div>
+      <p class="note">畫面鍵盤示範：p → 點 o͘ → po͘ → 點 7 → pō͘。也可直接打 <span class="pill">poo7</span>。已標調的音節，可再點其他聲調鍵更換調號。</p>
+      <p class="note">參考：<a href="https://taigi.fhl.net/TaigiIME/" target="_blank" rel="noopener">信望愛台語客語輸入法</a>、<a href="https://github.com/TongUanLab/thokit#白話字標準說明" target="_blank" rel="noopener">白話字拼寫與掛音慣例比較</a>。數字輸入與畫面按鍵操作依本工具設計。</p>
+    </section>
+  </div>
+</div>
+<script>
+var TONE = {'2':'́','3':'̀','5':'̂','7':'̄','8':'̍','9':'̋'};
+function matchCase(src, low) {
+  if (src.length > 1 && src === src.toUpperCase()) return low.toUpperCase();
+  if (src[0] !== src[0].toLowerCase()) return low[0].toUpperCase() + low.slice(1);
+  return low;
+}
+function pojSyllable(raw, tone, opts) {
+  opts = opts || {};
+  var s = raw;
+  if (opts.ts) {
+    s = s.replace(/^tsh/i, function (m) { return matchCase(m, 'chh'); })
+         .replace(/^ts/i, function (m) { return matchCase(m, 'ch'); });
+  }
+  var toks = [], i = 0;
+  while (i < s.length) {
+    var two = s.substr(i, 2).toLowerCase(), c = s[i];
+    if (two === 'oo') { toks.push({ b: s[i], dot: true, v: 'o' }); i += 2; }
+    else if (two === 'or') { toks.push({ b: s[i], below: true, v: 'o' }); i += 2; }
+    else if (two === 'ur') { toks.push({ b: s[i], below: true, v: 'u' }); i += 2; }
+    else if (two === 'nn' && /^h?$/i.test(s.slice(i + 2))) { toks.push({ b: 'ⁿ', fixed: true }); i += 2; }
+    else {
+      var l = c.toLowerCase();
+      toks.push('aeiou'.indexOf(l) >= 0 ? { b: c, v: l } : { b: c });
+      i += 1;
+    }
+  }
+  var mark = TONE[tone];
+  if (mark) {
+    var idx = -1, k;
+    var pick = function (v) { for (k = 0; k < toks.length; k++) if (toks[k].v === v) return k; return -1; };
+    // POJ: final oa/oe (including nasalized forms) marks o; closed forms mark a/e.
+    var openO = /o[ae](?:nn)?$/i.test(s);
+    idx = openO ? pick('o') : pick('a');
+    if (idx < 0) idx = pick('e');
+    if (idx < 0) idx = pick('o');
+    if (idx < 0) {
+      var vs = [];
+      for (k = 0; k < toks.length; k++) if (toks[k].v) vs.push(k);
+      if (vs.length === 2 && toks[vs[0]].v === 'i' && toks[vs[1]].v === 'u') idx = vs[1];
+      else if (vs.length === 2 && toks[vs[0]].v === 'u' && toks[vs[1]].v === 'i') idx = vs[0];
+      else if (vs.length) idx = vs[vs.length - 1];
+    }
+    if (idx < 0) {
+      var ng = -1;
+      for (k = 0; k < toks.length - 1; k++)
+        if (toks[k].b.toLowerCase() === 'n' && toks[k + 1].b.toLowerCase() === 'g') ng = k;
+      if (ng >= 0) idx = ng;
+      else for (k = 0; k < toks.length; k++) if (toks[k].b.toLowerCase() === 'm') { idx = k; break; }
+    }
+    if (idx >= 0) toks[idx].tone = mark;
+  }
+  return toks.map(function (t) {
+    return t.b + (t.below ? '̤' : '') + (t.tone || '') + (t.dot ? '͘' : '');
+  }).join('').normalize('NFC');
+}
+function pojText(text, opts) {
+  return text.replace(/([A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0300-\u036F\u207F]+)([1-5789])(?!\d)/g, function (m, w, d) {
+    var x = (typeof decodeToken === 'function') ? decodeToken(w) : { ascii: w };
+    return x ? pojSyllable(x.ascii, d, opts) : m;
+  });
+}
+/* ---- 糾錯:檢查音節是否合白話字拼法 ---- */
+var INIT = '(?:chh|ch|ph|th|kh|ng|p|b|m|t|n|l|k|g|h|j|s)?';
+var NUC = '(?:oai|iau|uai|oa|oe|ia|io|iu|ua|ue|ui|ai|au|oo|ur|or|a|e|i|o|u)';
+var FIN = 'nnh|nn|ng|m|n|p|t|k|h|';
+var RE_MAIN = new RegExp('^' + INIT + '(' + NUC + ')(' + FIN + ')$');
+var RE_SYL = /^(?:chh|ch|ph|th|kh|p|b|t|k|g|h|s|l|j|m|n)?(?:m|ng)h?$/;
+var N = ['', 'h', 'nn', 'nnh'];
+var RIMES = {
+  a: ['', 'p', 't', 'k', 'h', 'm', 'n', 'ng', 'nn', 'nnh'],
+  e: ['', 'k', 'h', 'ng', 'nn', 'nnh'],
+  i: ['', 'p', 't', 'k', 'h', 'm', 'n', 'ng', 'nn', 'nnh'],
+  o: ['', 'p', 'k', 'h', 'm', 'ng', 'nn', 'nnh'],
+  oo: N,
+  u: ['', 't', 'k', 'h', 'n', 'ng', 'nn', 'nnh'],
+  ai: N, au: N, ui: N, ue: N, oe: N, iu: N, iau: N, uai: N, oai: N.concat(['n']),
+  ia: ['', 'p', 't', 'k', 'h', 'm', 'n', 'ng', 'nn', 'nnh'],
+  io: ['', 'k', 'h', 'ng', 'nn', 'nnh'],
+  oa: ['', 't', 'h', 'n', 'ng', 'nn', 'nnh'],
+  ua: ['', 't', 'h', 'n', 'ng', 'nn', 'nnh'],
+  ur: ['', 't', 'k', 'h', 'n', 'ng', 'nn', 'nnh'],
+  or: ['', 'k', 'h', 'ng', 'nn', 'nnh']
+};
+function structOk(s) {
+  if (RE_SYL.test(s)) return true;
+  var m = RE_MAIN.exec(s);
+  return !!m && RIMES[m[1]].indexOf(m[2]) >= 0;
+}
+function isStop(s) { return /(?:[ptkh]|nnh)$/.test(s); }
+function toneOk(s, tone) {
+  var t = String(tone), entering = (t === '4' || t === '8');
+  return isStop(s) ? entering : !entering;
+}
+function validate(ascii, tone) {
+  var s = ascii.toLowerCase(), t = String(tone);
+  if (t === '6') return { ok: false, why: '沒有第 6 聲,第 6 聲和第 2 聲相同' };
+  if (!structOk(s)) return { ok: false, why: '這個拼法不在白話字音節裡' };
+  if (!toneOk(s, t)) return { ok: false, why: isStop(s) ? '以 p、t、k、h 結尾,只能用第 4 或第 8 聲' : '沒有 p、t、k、h 結尾,不能用第 4 或第 8 聲' };
+  return { ok: true };
+}
+var KB = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+function adjacent(a, b) {
+  for (var r = 0; r < 3; r++) {
+    var i = KB[r].indexOf(a);
+    if (i >= 0) {
+      for (var d = -1; d <= 1; d += 2) if (KB[r][i + d] === b) return true;
+      for (var r2 = r - 1; r2 <= r + 1; r2 += 2) if (r2 >= 0 && r2 < 3) {
+        var j = KB[r2].indexOf(b);
+        if (j >= 0 && Math.abs(j - i) <= 1) return true;
+      }
+    }
+  }
+  return false;
+}
+function candidates(ascii, tone, limit) {
+  var s = ascii.toLowerCase(), t = String(tone), out = {}, v = validate(s, t);
+  function add(a, tn, cost) {
+    var key = a + '|' + tn;
+    if (validate(a, tn).ok && (!(key in out) || out[key].cost > cost)) out[key] = { ascii: a, tone: tn, cost: cost };
+  }
+  if (t === '6') add(s, '2', 0);
+  else if (structOk(s) && !toneOk(s, t)) {
+    if (isStop(s)) {
+      var order = (t === '7' || t === '5') ? ['8', '4'] : ['4', '8'];
+      add(s, order[0], 0); add(s, order[1], 1);
+      add(s.replace(/(?:nnh|[ptkh])$/, function (m) { return m === 'nnh' ? 'nn' : ''; }), t, 2);
+    } else {
+      add(s + 'h', t, 0);
+      add(s, t === '4' ? '1' : '7', 1);
+    }
+  } else if (!structOk(s)) {
+    var ou = s.replace(/ou/, 'oo'); if (ou !== s) add(ou, t, 0);
+    var L = 'abcdefghijklmnopqrstuvwxyz', i, k;
+    for (i = 0; i + 1 < s.length; i++) add(s.slice(0, i) + s[i + 1] + s[i] + s.slice(i + 2), t, 1);
+    for (i = 0; i < s.length; i++) for (k = 0; k < 26; k++) if (L[k] !== s[i])
+      add(s.slice(0, i) + L[k] + s.slice(i + 1), t, adjacent(s[i], L[k]) ? 1.5 : 3);
+    for (i = 0; i < s.length; i++) add(s.slice(0, i) + s.slice(i + 1), t, 2);
+    for (i = 0; i <= s.length; i++) for (k = 0; k < 26; k++) add(s.slice(0, i) + L[k] + s.slice(i), t, 2.5);
+    // 聲調也一起不合時,再試著換調
+    Object.keys(out).length || (function () {
+      var alt = isStop(s) ? ['4', '8'] : ['1'];
+      alt.forEach(function (a) { add(s, a, 4); });
+    })();
+  }
+  var arr = Object.keys(out).map(function (x) { return out[x]; });
+  arr.sort(function (a, b) { return a.cost - b.cost || (a.ascii + a.tone < b.ascii + b.tone ? -1 : 1); });
+  return arr.slice(0, limit || 6);
+}
+/* 把畫面上的一個音節還原成 ascii + 聲調 */
+var MARK_TONE = { '́': '2', '̀': '3', '̂': '5', '̄': '7', '̍': '8', '̋': '9' };
+function decodeToken(tok, typedTone) {
+  var d = tok.normalize('NFD'), a = [], tone = '', special = false, i, c;
+  for (i = 0; i < d.length; i++) {
+    c = d[i];
+    if (/[A-Za-z]/.test(c)) a.push(c);
+    else if (MARK_TONE[c]) { if (!a.length) return null; tone = MARK_TONE[c]; }
+    else if (c === '͘') { if (!a.length || a[a.length - 1].toLowerCase() !== 'o') return null; a[a.length - 1] += a[a.length - 1] === 'O' ? 'o' : 'o'; special = true; }
+    else if (c === '̤') { var p = a[a.length - 1] || ''; if (p.toLowerCase() === 'u' || p.toLowerCase() === 'o') { a[a.length - 1] = p + 'r'; special = true; } else return null; }
+    else if (c === 'ⁿ') { a.push('nn'); special = true; }
+    else if (c === '6' && i === d.length - 1) tone = '6';
+    else return null;
+  }
+  if (!a.length) return null;
+  var ascii = a.join('');
+  return { ascii: ascii, tone: tone, marked: !!tone || special, special: special };
+}
+function tokenize(text) {
+  var re = /[A-Za-zÀ-ɏḀ-ỿ̀-ͯⁿ]+(?:6(?!\d))?/g, m, out = [];
+  while ((m = re.exec(text))) out.push({ text: m[0], start: m.index, end: m.index + m[0].length });
+  return out;
+}
+function checkToken(tok, entered) {
+  var d = decodeToken(tok.text);
+  if (!d) return null;
+  var typed = entered && entered.get(tok.text);
+  if (!d.marked && typed === undefined) return null;
+  var tone = d.tone || typed || (isStop(d.ascii.toLowerCase()) ? '4' : '1');
+  var v = validate(d.ascii, tone);
+  if (v.ok) return null;
+  return { token: tok, ascii: d.ascii, tone: tone, why: v.why, cands: candidates(d.ascii, tone, 6) };
+}
+function scan(text, caret, entered) {
+  var toks = tokenize(text), issues = [];
+  toks.forEach(function (t) {
+    if (caret >= t.start && caret <= t.end) return;
+    if (t.end === text.length) return;
+    var r = checkToken(t, entered);
+    if (r) issues.push(r);
+  });
+  return issues;
+}
+function renderFix(issue, cand, opts) {
+  var out = pojSyllable(cand.ascii, cand.tone, { ts: false });
+  var first = issue.token.text.replace(/[^A-Za-zÀ-ɏḀ-ỿ]/, function (x) { return x; }).charAt(0);
+  if (first && first !== first.toLowerCase() && first === first.toUpperCase()) out = out.charAt(0).toUpperCase() + out.slice(1);
+  return out;
+}
+var ed = document.getElementById('ed'), st = document.getElementById('st'), fixEl = document.getElementById('fix');
+var on = document.getElementById('on'), ts = document.getElementById('ts'), chk = document.getElementById('chk');
+var entered = new Map(), ignored = new Set(), timer, undoState = null;
+function opts() { return { ts: ts.checked }; }
+function say(t, undo) {
+  clearTimeout(timer); st.textContent = t;
+  if (undo) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = '復原';
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    b.addEventListener('click', function () {
+      ed.value = undo.value; ed.focus(); ed.setSelectionRange(undo.caret, undo.caret);
+      ignored.add(undo.token); st.textContent = ''; refresh();
+    });
+    st.appendChild(b);
+  }
+  timer = setTimeout(function () { st.textContent = ''; }, undo ? 6000 : 2200);
+}
+function record(out, digit) { if (digit === '1' || digit === '4') entered.set(out, digit); }
+function convertAtCaret() {
+  if (!on.checked) return;
+  var c = ed.selectionStart, v = ed.value;
+  if (/\d/.test(v.charAt(c))) return;
+  var m = /([A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0300-\u036F\u207F]+)([1-5789])$/.exec(v.slice(0, c));
+  if (!m) return;
+  var x = decodeToken(m[1]);
+  if (!x) return;
+  var out = pojSyllable(x.ascii, m[2], opts());
+  record(out, m[2]);
+  var start = c - m[0].length;
+  ed.value = v.slice(0, start) + out + v.slice(c);
+  var pos = start + out.length;
+  ed.setSelectionRange(pos, pos);
+}
+var VOWEL_BEFORE_NN = /[aeiouAEIOU\u00C0-\u017F\u1E00-\u1EFF\u0300-\u036F]$/;
+function liveSpecial() {
+  if (!on.checked) return;
+  var c = ed.selectionStart, v = ed.value, b = v.slice(0, c), m, rep = null, n = 0;
+  if ((m = /([Oo])[Oo]$/.exec(b))) { rep = m[1] + '\u0358'; n = 2; }
+  else if (/[Nn][Nn]$/.test(b) && VOWEL_BEFORE_NN.test(b.slice(0, -2))) { rep = '\u207F'; n = 2; }
+  else if ((m = /([uUoO])[rR]$/.exec(b))) { rep = (m[1] + '\u0324').normalize('NFC'); n = 2; }
+  if (!rep) return;
+  ed.value = b.slice(0, c - n) + rep + v.slice(c);
+  var p = c - n + rep.length;
+  ed.setSelectionRange(p, p);
+}
+function convertAll() {
+  ed.value = pojText(ed.value, opts());
+}
+/* 糾錯 */
+function applyCand(issue, cand, auto) {
+  var out = renderFix(issue, cand);
+  var v = ed.value, caret = ed.selectionStart, t = issue.token;
+  undoState = { value: v, caret: caret, token: out };
+  ed.value = v.slice(0, t.start) + out + v.slice(t.end);
+  var np = caret >= t.end ? caret + out.length - (t.end - t.start) : caret;
+  ed.setSelectionRange(np, np);
+  record(out, cand.tone);
+  if (auto) say('已把 ' + t.text + ' 改成 ' + out, { value: v, caret: caret, token: t.text });
+}
+function currentIssues() {
+  if (!chk.checked) return [];
+  return scan(ed.value, ed.selectionStart, entered).filter(function (i) { return !ignored.has(i.token.text); });
+}
+function refresh() {
+  var issues = currentIssues();
+  fixEl.textContent = '';
+  fixEl.hidden = !issues.length;
+  issues.forEach(function (is) {
+    var row = document.createElement('div'); row.className = 'row';
+    var tk = document.createElement('button'); tk.type = 'button'; tk.className = 'tk'; tk.textContent = is.token.text;
+    tk.setAttribute('aria-label', '在輸入框中選取 ' + is.token.text);
+    tk.addEventListener('click', function () { ed.focus(); ed.setSelectionRange(is.token.start, is.token.end); });
+    var why = document.createElement('span'); why.className = 'why'; why.textContent = is.why;
+    row.appendChild(tk); row.appendChild(why);
+    is.cands.forEach(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'c';
+      b.textContent = '→ ' + renderFix(is, c);
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      b.addEventListener('click', function () { applyCand(is, c, false); refresh(); });
+      row.appendChild(b);
+    });
+    var ig = document.createElement('button'); ig.type = 'button'; ig.className = 'ig'; ig.textContent = '忽略';
+    ig.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    ig.addEventListener('click', function () { ignored.add(is.token.text); refresh(); });
+    row.appendChild(ig);
+    fixEl.appendChild(row);
+  });
+}
+function autoFixBeforeSeparator() {
+  if (!chk.checked) return;
+  var c = ed.selectionStart, v = ed.value;
+  if (c < 2 || /[A-Za-zÀ-ɏ̀-ͯḀ-ỿⁿ\d]/.test(v.charAt(c - 1))) return;
+  var toks = tokenize(v.slice(0, c - 1)), last = toks[toks.length - 1];
+  if (!last || last.end !== c - 1 || ignored.has(last.text)) return;
+  var is = checkToken(last, entered);
+  if (is && is.cands.length === 1) applyCand(is, is.cands[0], true);
+}
+function onInput(e) {
+  if (!e || !e.inputType || /^insert/.test(e.inputType)) liveSpecial();
+  convertAtCaret();
+  if (e && e.inputType === 'insertText' && e.data && /^[\s\-.,;:!?'"()]$/.test(e.data)) autoFixBeforeSeparator();
+  refresh();
+}
+// Keep the editor range when a touch, mouse, or keyboard moves focus to a key.
+var editorRange = { start: ed.selectionStart, end: ed.selectionEnd };
+function rememberRange() {
+  editorRange = { start: ed.selectionStart, end: ed.selectionEnd };
+}
+['input', 'select', 'keyup', 'click', 'blur'].forEach(function (event) {
+  ed.addEventListener(event, rememberRange);
+});
+document.addEventListener('selectionchange', function () {
+  if (document.activeElement === ed) rememberRange();
+});
+function insert(t) {
+  var a = Math.min(editorRange.start, ed.value.length);
+  var b = Math.min(editorRange.end, ed.value.length);
+  var out = t;
+  if (t === '__backspace__') {
+    out = '';
+    if (a === b && a > 0) {
+      var prefix = ed.value.slice(0, a);
+      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+        var segments = Array.from(new Intl.Segmenter('nan', { granularity: 'grapheme' }).segment(prefix));
+        a = segments[segments.length - 1].index;
+      } else {
+        a--;
+        while (a > 0 && /[\u0300-\u036f]/.test(ed.value[a])) a--;
+      }
+    }
+  }
+  // A dot key after an existing o adds the dot to that letter.
+  if (t === 'o\u0358' && a === b) {
+    var lastO = /[oO](?:[\u0300-\u036f]*)$/.exec(ed.value.slice(0, a).normalize('NFD'));
+    if (lastO) {
+      var previous = Array.from(ed.value.slice(0, a)).pop() || '';
+      // Find the original grapheme without changing offsets elsewhere.
+      var start = a;
+      while (start > 0 && /[\u0300-\u036f]/.test(ed.value[start - 1])) start--;
+      if (start > 0) start--;
+      var letter = ed.value.slice(start, a).normalize('NFD');
+      if (/^[oO][\u0300-\u036f]*$/.test(letter)) {
+        a = start;
+        out = (letter.replace(/\u0358/g, '') + '\u0358').normalize('NFC');
+      }
+    }
+  }
+  // An explicit tone key always acts on the syllable, even with auto conversion off.
+  if (/^[1-5789]$/.test(t)) {
+    var selected = ed.value.slice(a, b);
+    var before = /[A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0300-\u036F\u207F]+$/.exec(ed.value.slice(0, a));
+    var token = selected || (before ? before[0] : '');
+    var decoded = decodeToken(token);
+    if (!decoded) { say('請先輸入音節，再點聲調鍵'); return; }
+    if (!selected) a -= token.length;
+    out = pojSyllable(decoded.ascii, t, opts());
+    if (out === pojSyllable(decoded.ascii, '1', opts()) && TONE[t]) {
+      say('請先輸入母音，再點聲調鍵'); return;
+    }
+    record(out, t);
+  }
+  ed.value = ed.value.slice(0, a) + out + ed.value.slice(b);
+  ed.focus({ preventScroll: true });
+  ed.setSelectionRange(a + out.length, a + out.length);
+  rememberRange();
+  refresh();
+}
+ed.addEventListener('input', onInput);
+ed.addEventListener('compositionend', function () { liveSpecial(); convertAtCaret(); refresh(); });
+ed.addEventListener('keyup', function (e) { if (/Arrow|Home|End|Page/.test(e.key)) refresh(); });
+ed.addEventListener('click', refresh);
+ed.addEventListener('paste', function () { setTimeout(function () {
+  if (on.checked) { var r = pojText(ed.value, opts()); if (r !== ed.value) { ed.value = r; ed.setSelectionRange(r.length, r.length); } }
+  refresh();
+}, 0); });
+[on, ts, chk].forEach(function (x) { x.addEventListener('change', refresh); });
+document.querySelectorAll('[data-insert]').forEach(function (b) {
+  b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  b.addEventListener('pointerdown', function (e) {
+    if (document.activeElement === ed) rememberRange();
+    e.preventDefault();
+  });
+  b.addEventListener('click', function () { insert(b.getAttribute('data-insert')); });
+});
+document.getElementById('all').addEventListener('click', function () { convertAll(); say('已轉換'); refresh(); });
+document.getElementById('clr').addEventListener('click', function () { ed.value = ''; entered.clear(); ignored.clear(); ed.focus(); ed.setSelectionRange(0, 0); rememberRange(); refresh(); });
+document.getElementById('copy').addEventListener('click', function () {
+  var t = ed.value;
+  function fb() { ed.focus(); ed.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} say(ok ? '已複製' : '已全選,請按複製'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say('已複製'); }, fb); else fb();
+});
+
+ed.setSelectionRange(ed.value.length, ed.value.length);
+rememberRange();
+</script>
+
+</body></html>
